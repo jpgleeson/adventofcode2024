@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math"
 	"os"
 	"sort"
 	"strconv"
@@ -10,10 +11,10 @@ import (
 )
 
 func main() {
-	day1_part1()
+	day2()
 }
 
-func day1_part1() {
+func day1() {
 	file, err := os.Open("./day1part1.csv")
 	if err != nil {
 		fmt.Println("Error opening file:", err)
@@ -70,4 +71,51 @@ func day1_part1() {
 	}
 
 	fmt.Println(sum)
+}
+
+func day2() {
+	file, err := os.Open("./day2input.csv")
+	if err != nil {
+		fmt.Println("Error opening file:", err)
+		return
+	}
+	defer file.Close()
+
+	safeReports := 0
+	var safeReportListing [][]string
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		fields := strings.Fields(line)
+
+		var ascending bool
+		safe := true
+
+		for i, value := range fields {
+			valueNumber, _ := strconv.ParseInt(value, 10, 64)
+
+			if i == 0 {
+				nextValue, _ := strconv.ParseInt(fields[i+1], 10, 64)
+				ascending = valueNumber < nextValue
+			}
+
+			if i != 0 {
+				previousValue, _ := strconv.ParseInt(fields[i-1], 10, 64)
+				step := math.Abs(float64(valueNumber) - float64(previousValue))
+
+				isAscending := value > fields[i-1]
+				if (isAscending != ascending) || step < 1 || step > 3 {
+					safe = false
+					break
+				}
+			}
+		}
+		if safe {
+			safeReports += 1
+			safeReportListing = append(safeReportListing, fields)
+		}
+	}
+
+	fmt.Println(safeReports)
 }
