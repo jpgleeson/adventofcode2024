@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
 )
 
 func main() {
-	day2()
+	day3()
 }
 
 func day1() {
@@ -118,6 +119,43 @@ func day2() {
 	}
 
 	fmt.Println(safeReports)
+}
+
+func day3() {
+	file, err := os.Open("./day3input.txt")
+	if err != nil {
+		fmt.Println("Error opening file:", err)
+		return
+	}
+	defer file.Close()
+
+	var input string
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		input += line
+	}
+
+	regexFinder, err := regexp.Compile(`mul\(\d*,\d*\)`)
+	if err != nil {
+		fmt.Println("error making regex")
+	}
+	matches := regexFinder.FindAllString(input, -1)
+
+	var sum float64
+	for _, match := range matches {
+		tempClean := strings.Split(match, "(")[1]
+		clean := strings.Split(tempClean, ")")[0]
+		var values []float64
+		for _, value := range strings.Split(clean, ",") {
+			value, _ := strconv.ParseFloat(value, 64)
+			values = append(values, value)
+		}
+		sum += values[0] * values[1]
+		fmt.Println(sum)
+	}
+	fmt.Println(fmt.Sprintf("%f", sum))
 }
 
 func removeIndexFromSlice(slice []float64, index int) []float64 {
