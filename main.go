@@ -89,28 +89,17 @@ func day2() {
 		line := scanner.Text()
 		fields := strings.Fields(line)
 
-		var ascending bool
-		safe := true
-
-		for i, value := range fields {
-			valueNumber, _ := strconv.ParseInt(value, 10, 64)
-
-			if i == 0 {
-				nextValue, _ := strconv.ParseInt(fields[i+1], 10, 64)
-				ascending = valueNumber < nextValue
+		var level []float64
+		for _, field := range fields {
+			conv, err := strconv.ParseFloat(field, 64)
+			if err != nil {
+				fmt.Println("Error parsing float")
 			}
-
-			if i != 0 {
-				previousValue, _ := strconv.ParseInt(fields[i-1], 10, 64)
-				step := math.Abs(float64(valueNumber) - float64(previousValue))
-
-				isAscending := value > fields[i-1]
-				if (isAscending != ascending) || step < 1 || step > 3 {
-					safe = false
-					break
-				}
-			}
+			level = append(level, conv)
 		}
+
+		safe := checkRules(level)
+
 		if safe {
 			safeReports += 1
 			safeReportListing = append(safeReportListing, fields)
@@ -118,4 +107,37 @@ func day2() {
 	}
 
 	fmt.Println(safeReports)
+}
+
+func checkRules(level []float64) bool {
+	var ascending bool
+	fmt.Println(level)
+
+	// only ascending or descending
+	// diff between adjacent values is between 1 and 3
+	ascending = level[0] < level[1]
+
+	for i, value := range level {
+		if i > 0 {
+			if ascending {
+				if level[i-1] > value {
+					fmt.Println("Descending on an ascending row")
+					return false
+				}
+			} else {
+				if level[i-1] < value {
+					fmt.Println("Ascending on an descending row")
+					return false
+				}
+			}
+
+			stepSize := math.Abs(level[i-1] - value)
+			if stepSize < 1 || stepSize > 3 {
+				fmt.Printf("Wrong step size of %f", stepSize)
+				return false
+			}
+		}
+	}
+
+	return true
 }
