@@ -137,6 +137,35 @@ func day3() {
 		input += line
 	}
 
+	enabled := true
+	var enabledStrings []string
+	remainder := input
+
+	for running := true; running; {
+		if enabled {
+			if strings.Contains(remainder, "don't()") {
+				enabledString, cutRemainder, _ := strings.Cut(remainder, "don't()")
+				enabledStrings = append(enabledStrings, enabledString)
+				remainder = cutRemainder
+				enabled = !enabled
+			} else {
+				enabledString, _, _ := strings.Cut(remainder, "don't()")
+				enabledStrings = append(enabledStrings, enabledString)
+				running = false
+			}
+		} else {
+			if strings.Contains(remainder, "do()") {
+				_, cutRemainder, _ := strings.Cut(remainder, "do()")
+				remainder = cutRemainder
+				enabled = !enabled
+			} else {
+				running = false
+			}
+		}
+	}
+
+	input = strings.Join(enabledStrings, "")
+
 	regexFinder, err := regexp.Compile(`mul\(\d*,\d*\)`)
 	if err != nil {
 		fmt.Println("error making regex")
@@ -153,9 +182,8 @@ func day3() {
 			values = append(values, value)
 		}
 		sum += values[0] * values[1]
-		fmt.Println(sum)
 	}
-	fmt.Println(fmt.Sprintf("%f", sum))
+	fmt.Println(fmt.Sprintf("%d", int(sum)))
 }
 
 func removeIndexFromSlice(slice []float64, index int) []float64 {
