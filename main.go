@@ -100,6 +100,17 @@ func day2() {
 
 		safe := checkRules(level)
 
+		if !safe {
+			for i := range level {
+				cleanedLevel := removeIndexFromSlice(level, i)
+				cleanedSafe := checkRules(cleanedLevel)
+				if cleanedSafe {
+					safe = cleanedSafe
+					break
+				}
+			}
+		}
+
 		if safe {
 			safeReports += 1
 			safeReportListing = append(safeReportListing, fields)
@@ -109,10 +120,14 @@ func day2() {
 	fmt.Println(safeReports)
 }
 
+func removeIndexFromSlice(slice []float64, index int) []float64 {
+	result := append([]float64{}, slice[:index]...)
+	result = append(result, slice[index+1:]...)
+	return result
+}
+
 func checkRules(level []float64) bool {
 	var ascending bool
-	fmt.Println(level)
-
 	// only ascending or descending
 	// diff between adjacent values is between 1 and 3
 	ascending = level[0] < level[1]
@@ -133,7 +148,7 @@ func checkRules(level []float64) bool {
 
 			stepSize := math.Abs(level[i-1] - value)
 			if stepSize < 1 || stepSize > 3 {
-				fmt.Printf("Wrong step size of %f", stepSize)
+				fmt.Printf("Wrong step size of %d\n", int(stepSize))
 				return false
 			}
 		}
