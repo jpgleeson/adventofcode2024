@@ -9,10 +9,11 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 )
 
 func main() {
-	day3()
+	day4()
 }
 
 func day1() {
@@ -184,6 +185,128 @@ func day3() {
 		sum += values[0] * values[1]
 	}
 	fmt.Println(fmt.Sprintf("%d", int(sum)))
+}
+
+func day4() {
+	file, err := os.Open("./day4input.txt")
+	if err != nil {
+		fmt.Println("Error opening file:", err)
+		return
+	}
+	defer file.Close()
+
+	characters := []string{}
+
+	scanner := bufio.NewScanner(file)
+	lineNumber := 0
+	lineLength := 0
+	for scanner.Scan() {
+		line := scanner.Text()
+		lineLength = utf8.RuneCountInString(line)
+		for _, value := range line {
+			characters = append(characters, fmt.Sprintf("%c", value))
+		}
+		lineNumber++
+	}
+
+	grid := make([][]string, lineNumber)
+	for i := range grid {
+		grid[i] = make([]string, lineLength)
+		for j := range grid[i] {
+			characterIndex := (i * lineLength) + j
+			grid[i][j] = characters[characterIndex]
+		}
+	}
+
+	fmt.Println(lineLength, lineNumber)
+	for _, row := range grid {
+		fmt.Println(row)
+	}
+
+	var wordsFound float64
+
+	for x, row := range grid {
+		for y := range row {
+			for i := 1; i <= 9; i++ {
+				if checkForWord(x, y, "XMAS", i, grid) {
+					wordsFound += 1
+				}
+			}
+		}
+	}
+
+	fmt.Printf("FOUND: %d \n", int(wordsFound))
+}
+
+func checkForWord(x int, y int, remaining string, direction int, grid [][]string) bool {
+	// 1 2 3
+	// 4   6
+	// 7 8 9
+
+	var nextCharacter string
+
+	nextCharacter = firstCharacter(remaining)
+
+	if grid[x][y] == nextCharacter {
+		_, nextRemaining, _ := strings.Cut(remaining, nextCharacter)
+
+		if nextRemaining == "" {
+			return true
+		}
+		newX := x
+		newY := y
+
+		switch direction {
+		case 1:
+			newX -= 1
+			newY -= 1
+		case 2:
+			newY -= 1
+		case 3:
+			newX += 1
+			newY -= 1
+		case 4:
+			newX -= 1
+		case 6:
+			newX += 1
+		case 7:
+			newX -= 1
+			newY += 1
+		case 8:
+			newY += 1
+		case 9:
+			newX += 1
+			newY += 1
+		}
+
+		if newX < 0 || newX > len(grid[0])-1 {
+			return false
+		}
+		if newY < 0 || newY > len(grid)-1 {
+			return false
+		}
+
+		// check direction recursing here.
+		if checkForWord(newX, newY, nextRemaining, direction, grid) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func firstCharacter(str string) string {
+	v := []rune(str)
+	return string(v[:1])
+}
+
+func contains(slice []int, item int) bool {
+	for _, elem := range slice {
+		if elem == item {
+			return true
+		}
+	}
+	return false
 }
 
 func removeIndexFromSlice(slice []float64, index int) []float64 {
