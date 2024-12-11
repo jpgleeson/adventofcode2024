@@ -227,15 +227,40 @@ func day4() {
 
 	for x, row := range grid {
 		for y := range row {
-			for i := 1; i <= 9; i++ {
-				if checkForWord(x, y, "XMAS", i, grid) {
-					wordsFound += 1
-				}
+			// for i := 1; i <= 9; i++ {
+			// 	if checkForWord(x, y, "XMAS", i, grid) {
+			// 		wordsFound += 1
+			// 	}
+			// }
+			if checkForX(x, y, grid) {
+				wordsFound += 1
+				continue
 			}
 		}
 	}
 
 	fmt.Printf("FOUND: %d \n", int(wordsFound))
+}
+
+func checkForX(x int, y int, grid [][]string) bool {
+	if x < 1 || x > len(grid[0])-2 || y < 1 || y > len(grid)-2 {
+		return false
+	}
+	if grid[x][y] != "A" {
+		return false
+	}
+
+	if (grid[x-1][y-1] == "M" && grid[x+1][y+1] == "S") || (grid[x-1][y-1] == "S" && grid[x+1][y+1] == "M") {
+		if (grid[x+1][y-1] == "M" && grid[x-1][y+1] == "S") || (grid[x-1][y+1] == "M" && grid[x+1][y-1] == "S") {
+			return true
+		}
+	} else if (grid[x+1][y+1] == "M" && grid[x-1][y-1] == "S") || (grid[x+1][y+1] == "S" && grid[x-1][y-1] == "M") {
+		if (grid[x+1][y-1] == "M" && grid[x-1][y+1] == "S") || (grid[x-1][y+1] == "M" && grid[x+1][y-1] == "S") {
+			return true
+		}
+	}
+
+	return false
 }
 
 func checkForWord(x int, y int, remaining string, direction int, grid [][]string) bool {
