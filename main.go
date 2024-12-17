@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	day4()
+	day5()
 }
 
 func day1() {
@@ -240,6 +240,91 @@ func day4() {
 	}
 
 	fmt.Printf("FOUND: %d \n", int(wordsFound))
+}
+
+type OrderingRule struct {
+	Lower  int
+	Higher int
+}
+
+func (rule OrderingRule) Applies(inputs []int) bool {
+	var lowerPlace, higherPlace *int
+	for i, value := range inputs {
+		if value == rule.Lower {
+			lowerPlace = &i
+		}
+		if value == rule.Higher {
+			higherPlace = &i
+		}
+	}
+
+	if lowerPlace != nil && higherPlace != nil {
+		if *lowerPlace < *higherPlace {
+			return true
+		}
+		return false
+	}
+
+	return true
+}
+
+func day5() {
+	file, err := os.Open("./day5input.txt")
+	if err != nil {
+		fmt.Println("Error opening file:", err)
+		return
+	}
+	defer file.Close()
+
+	rules := []OrderingRule{}
+	printOrders := [][]int{}
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if line == "" {
+			continue
+		}
+		if strings.Contains(line, "|") {
+			rule := OrderingRule{}
+			components := strings.Split(line, "|")
+			lower, _ := strconv.ParseInt(components[0], 10, 0)
+			higher, _ := strconv.ParseInt(components[1], 10, 0)
+			rule.Lower = int(lower)
+			rule.Higher = int(higher)
+
+			rules = append(rules, rule)
+		} else {
+			pageOrdering := []int{}
+			components := strings.Split(line, ",")
+			for _, component := range components {
+				value, _ := strconv.ParseInt(component, 10, 0)
+				pageOrdering = append(pageOrdering, int(value))
+			}
+			printOrders = append(printOrders, pageOrdering)
+		}
+	}
+
+	middlePageNumbers := []int{}
+
+	for _, order := range printOrders {
+		goodOrdering := true
+		for _, rule := range rules {
+			if !rule.Applies(order) {
+				goodOrdering = false
+			}
+		}
+		if goodOrdering {
+			middlePageNumbers = append(middlePageNumbers, order[len(order)/2])
+		}
+	}
+
+	var sum int64
+	for _, value := range middlePageNumbers {
+		sum += int64(value)
+	}
+
+	fmt.Println(sum)
 }
 
 func checkForX(x int, y int, grid [][]string) bool {
